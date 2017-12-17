@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
                         try {
                             Log.d("MainActivity", "onClick");
                             // 创建Socket对象 & 指定服务端的IP 及 端口号
-                            socket = new Socket("0.tcp.ngrok.io", 10003);
+                            socket = new Socket("0.tcp.ngrok.io", 13972);
                             // 判断客户端和服务器是否连接成功
                             if(socket.isConnected())
                                 Log.d("MainActivity", "connected");
@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity
 
                         try
                         {
-                            Bitmap bitmap = BitmapFactory.decodeStream(getAssets().open("img.jpg"));
+                            Bitmap bitmap = BitmapFactory.decodeStream(getAssets().open("img_large.jpg"));
                             Log.d("MainActivity", "bitmap.getConfig(): " + bitmap.getConfig());
                             Log.d("MainActivity", "bitmap.getWidth(): " + bitmap.getWidth());
                             Log.d("MainActivity", "bitmap.getHeight(): " + bitmap.getHeight());
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity
                             dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
                             byte[] byteArray = byteArrayOutputStream.toByteArray();
 
 //                            //直接转bitmap为byteArray，不压缩
@@ -187,6 +187,10 @@ public class MainActivity extends AppCompatActivity
                             b.putInt(array_length);
                             dataOutputStream.write(b.array());
                             dataOutputStream.write(byteArray);
+//                            dataOutputStream.flush();
+
+                            double compass = 2.333;
+                            dataOutputStream.write((Double.toString(compass)+"\n").getBytes("utf-8"));
                             dataOutputStream.flush();
                         } catch (IOException e)
                         {
@@ -246,17 +250,17 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         try {
                             outputStream = socket.getOutputStream();
-                            dataOutputStream = new DataOutputStream(outputStream);
+//                            dataOutputStream = new DataOutputStream(outputStream);
                             //传字符串
-                            outputStream.write((mEdit.getText().toString()+"\n").getBytes("utf-8"));
+//                            outputStream.write((mEdit.getText().toString()+"\n").getBytes("utf-8"));
 
                             //传double
-                            double compass = 2.333;
-                            outputStream.write((Double.toString(compass)+"\n").getBytes("utf-8"));
+//                            double compass = 2.333;
+//                            outputStream.write((Double.toString(compass)+"\n").getBytes("utf-8"));
                             // 特别注意：数据的结尾加上换行符才可让服务器端的readline()停止阻塞
 
                             //传int
-                            int count = 4324235;
+                            int count = 0;
                             ByteBuffer b = ByteBuffer.allocate(4);
                             b.putInt(count);
                             byte[] byteArray = b.array();
@@ -278,6 +282,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 try {
+                    dataOutputStream.close();
                     outputStream.close();
                     br.close();
                     socket.close();
