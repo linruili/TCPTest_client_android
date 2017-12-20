@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,12 +97,14 @@ public class MainActivity extends AppCompatActivity
                         try {
                             Log.d("MainActivity", "onClick");
                             // 创建Socket对象 & 指定服务端的IP 及 端口号
-                            socket = new Socket("0.tcp.ngrok.io", 13972);
+                            socket = new Socket("amax.lan", 9132);
+//                            socket = new Socket("0.tcp.ngrok.io", 12464);
                             // 判断客户端和服务器是否连接成功
                             if(socket.isConnected())
                                 Log.d("MainActivity", "connected");
                             else
                                 Log.d("MainActivity", "failed to connect");
+
                         } catch (IOException e) {
                             e.printStackTrace();
                         }finally
@@ -184,13 +187,24 @@ public class MainActivity extends AppCompatActivity
                             Log.d("MainActivity", "byteArray.length: " + byteArray.length);
                             int array_length = byteArray.length;
                             ByteBuffer b = ByteBuffer.allocate(4);
-                            b.putInt(array_length);
-                            dataOutputStream.write(b.array());
-                            dataOutputStream.write(byteArray);
-//                            dataOutputStream.flush();
 
-                            double compass = 2.333;
-                            dataOutputStream.write((Double.toString(compass)+"\n").getBytes("utf-8"));
+
+//                            for(int i=1; i<10; ++i)
+                            {
+                                b.clear();
+                                b.putInt(array_length);
+                                dataOutputStream.write(b.array());
+                                dataOutputStream.write(byteArray);
+
+                                double compass = 2.333;
+                                byte[] doubleArray = (Double.toString(compass)).getBytes("utf-8");
+                                b.clear();
+                                b.putInt(doubleArray.length);
+                                dataOutputStream.write(b.array());
+                                dataOutputStream.write(doubleArray);
+
+                            }
+
                             dataOutputStream.flush();
                         } catch (IOException e)
                         {
@@ -250,13 +264,19 @@ public class MainActivity extends AppCompatActivity
                     public void run() {
                         try {
                             outputStream = socket.getOutputStream();
-//                            dataOutputStream = new DataOutputStream(outputStream);
+                            dataOutputStream = new DataOutputStream(outputStream);
                             //传字符串
 //                            outputStream.write((mEdit.getText().toString()+"\n").getBytes("utf-8"));
 
                             //传double
 //                            double compass = 2.333;
-//                            outputStream.write((Double.toString(compass)+"\n").getBytes("utf-8"));
+//                            byte[] doubleArray = (Double.toString(compass)).getBytes("utf-8");
+//
+//                            ByteBuffer b = ByteBuffer.allocate(4);
+//                            b.putInt(doubleArray.length);
+//                            dataOutputStream.write(b.array());
+//                            dataOutputStream.write(doubleArray);
+//                            dataOutputStream.flush();
                             // 特别注意：数据的结尾加上换行符才可让服务器端的readline()停止阻塞
 
                             //传int
@@ -284,13 +304,7 @@ public class MainActivity extends AppCompatActivity
                 try {
                     dataOutputStream.close();
                     outputStream.close();
-                    br.close();
                     socket.close();
-                    // 判断客户端和服务器是否已经断开连接
-                    if(socket.isConnected())
-                        Log.d("MainActivity", "failed to disconnect");
-                    else
-                        Log.d("MainActivity", "disconnect");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
